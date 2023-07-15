@@ -1,20 +1,32 @@
-import {App, Plugin, PluginSettingTab} from 'obsidian';
+import {App, MarkdownRenderChild, Plugin, PluginManifest, PluginSettingTab} from 'obsidian';
 
 interface Data {
 	settings: Settings
 }
 
 interface Settings {
+	descriptionListSeparator: string,
+	attributes: string[]
 }
 
-const DEFAULT_SETTINGS: Settings = {}
+const DEFAULT_SETTINGS: Settings = {
+	descriptionListSeparator: '::',
+	attributes: ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']
+}
 
 const DEFAULT_DATA: Data = {
 	settings: DEFAULT_SETTINGS
 }
 
 export default class DnDPlugin extends Plugin {
+	static instance: DnDPlugin;
+
 	data: Data;
+
+	constructor(app: App, manifest: PluginManifest) {
+		super(app, manifest);
+		DnDPlugin.instance = this;
+	}
 
 	get settings(): Settings {
 		return this.data.settings;
@@ -26,6 +38,10 @@ export default class DnDPlugin extends Plugin {
 		this.addSettingTab(new SettingTab(this.app, this));
 
 		await this.addAssetsStyles();
+
+		await this.registerDescriptionListPostProcessor();
+
+		await this.registerAttributesTablePostProcessor();
 	}
 
 	async addAssetsStyles() {
@@ -214,6 +230,41 @@ export default class DnDPlugin extends Plugin {
 		`
 	}
 
+	async registerDescriptionListPostProcessor() {
+		this.registerMarkdownPostProcessor((element, context) => {
+			const lists = element.querySelectorAll('ul');
+			for (let i = 0; i < lists.length; i++) {
+				const list = lists.item(i);
+				if (Array.from(list.querySelectorAll(':scope > li'))
+					.every(node => node.textContent!.includes(this.settings.descriptionListSeparator))) {
+					context.addChild(new DescriptionList(list));
+				}
+			}
+		});
+	}
+
+	async registerAttributesTablePostProcessor() {
+		this.registerMarkdownCodeBlockProcessor('attributes', (source, el, context) => {
+			const scores = source.split('/').map(s => s.trim());
+			console.assert(scores.length == 6);
+
+			const table = el.createEl('table', {cls: 'attributes'});
+			const head = table.createEl('thead');
+			const headRow = head.createEl('tr');
+			const body = table.createEl('tbody');
+			const bodyRow = body.createEl('tr');
+
+			for (let i = 0; i < 6; i++) {
+				const attribute = this.settings.attributes[i];
+				const score = scores[i];
+				const modifier = Math.floor(parseInt(score) / 2) - 5;
+				const signedModifier = modifier >= 0 ? "+" + modifier : "" + modifier;
+				headRow.createEl('th', {text: attribute});
+				bodyRow.createEl('td', {text: `${score} (${signedModifier})`});
+			}
+		});
+	}
+
 	onunload() {
 
 	}
@@ -224,6 +275,38 @@ export default class DnDPlugin extends Plugin {
 
 	async saveData() {
 		await super.saveData(this.data);
+	}
+}
+
+class DescriptionList extends MarkdownRenderChild {
+	constructor(containerEl: HTMLElement) {
+		super(containerEl);
+	}
+
+	onload() {
+		const separator = DnDPlugin.instance.settings.descriptionListSeparator;
+
+		const items = Array.from(this.containerEl.querySelectorAll(':scope > li'));
+
+		const list = this.containerEl.createEl('dl');
+
+		for (const item of items) {
+			const innerHTML = item.innerHTML;
+			const index = innerHTML.indexOf(separator);
+
+			if (index == -1) {
+				const description = list.createEl('dd');
+				description.innerHTML = innerHTML;
+			} else {
+				const term = list.createEl('dt');
+				term.innerHTML = innerHTML.substring(0, index).trim();
+
+				const description = list.createEl('dd');
+				description.innerHTML = innerHTML.substring(index + separator.length).trim();
+			}
+		}
+
+		this.containerEl.replaceWith(list);
 	}
 }
 
