@@ -1,0 +1,15 @@
+.markdown-rendered table
+	th, td
+		border: none
+		vertical-align: baseline
+
+	th:first-child, td:first-child
+		padding-left: 16px
+
+	th:last-child, td:last-child
+		padding-right: 16px
+
+	--table-row-alt-background: var(--accent) !important
+
+	tbody tr:nth-child(odd):hover
+		--table-row-background-hover: var(--table-row-alt-background)

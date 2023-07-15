@@ -1,0 +1,102 @@
+.callout[data-callout="stat-block"]
+	width: 320px
+	padding: 4px 2px
+	background-color: var(--stat-block-color)
+	background-image: var(--stat-block-background)
+	background-blend-mode: overlay
+	mix-blend-mode: normal
+	border-radius: 0
+	border-style: solid
+	border-width: 7px 6px
+	//noinspection CssOverwrittenProperties
+	border-image: var(--stat-block-border) 14 round
+	//noinspection CssOverwrittenProperties
+	border-image-outset: 0 2px
+	box-shadow: 1px 4px 14px #888
+	font-family: var(--source-font)
+	--font-family: var(--source-font)
+
+	.callout-title
+		color: currentColor
+
+		.callout-icon
+			display: none
+
+		.callout-title-inner > *
+			margin: 0
+			line-height: 1em
+
+		.callout-fold
+			align-self: center
+
+	.callout-content
+		font-size: 12px
+		margin-top: 0
+
+		p
+			margin: 1em 0
+
+		> p:first-child, h3 + p
+			margin-top: 0
+
+		> p:first-child, > p:last-child
+			margin-bottom: 0
+
+		h3
+			font-family: ScalySansRemake, sans-serif
+			--font-family: ScalySansRemake, sans-serif
+			font-weight: 800
+			font-variant: small-caps
+			border-bottom: 2px solid var(--header-color)
+			padding-bottom: 2px
+			line-height: 1em
+			margin: 12px 0 6px 0
+
+		hr
+			height: 6px
+			margin: 4px 0
+			background-image: var(--stat-block-hr)
+			background-size: 100% 100%
+			border: none
+
+			+ dl
+				color: var(--header-color)
+
+		table.attributes
+			margin: 0
+			width: 100%
+			color: var(--header-color)
+
+			th
+				color: var(--header-color)
+
+			td, th
+				padding: 0
+				text-align: center
+
+			tbody tr
+				background-color: transparent
+
+		p, dl, ul, ol
+			line-height: 1.2em
+
+		dl
+			white-space: pre-line
+			padding-left: 1em
+			margin: 0
+
+			dt
+				display: inline
+				margin-left: -1em
+				margin-right: 5px
+
+				> .list-bullet
+					display: none
+
+			dd
+				display: inline
+				margin-left: 0
+
+				&::after
+					content: ""
+					display: block

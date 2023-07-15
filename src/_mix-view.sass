@@ -1,0 +1,28 @@
+.mix-table
+	font-size: var(--font-ui-small)
+	margin-bottom: var(--size-4-4)
+
+	input.proportion
+		width: 2.5em
+		text-align: center
+
+.state-chart path
+	opacity: 0.8
+	color: var(--state-chart-section-base-color)
+
+	&.current
+		color: var(--state-chart-current-section-color)
+
+		&.active
+			color: var(--state-chart-active-section-color)
+			opacity: 1.0
+
+.track-info
+	font-size: var(--font-ui-small)
+
+.audio-controls
+	display: flex
+	align-items: center
+
+	.slider
+		flex-grow: 1
