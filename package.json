@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-sample-plugin",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "This plugin turns Obsidian into a fully-fledged, integrated D&D environment for Dungeon Masters.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs & sass --watch --no-source-map src/styles.sass:../obsidian-dnd/styles.css & cpx --watch src/manifest.json ../obsidian-dnd",
