@@ -5,6 +5,7 @@ import {registerHTMLAttributesPostProcessor} from './htmlAttributesPostProcessor
 import {registerTextIndentPostProcessor} from './textIndentPostProcessor';
 import {Data, Settings, SettingTab, loadData, saveData} from './data';
 import {addAssetsStyles} from './assetsStyles';
+import {registerTextIndentExtension} from "./textIndentExtension";
 
 export default class DnDPlugin extends Plugin {
 	__proto__: any;
@@ -18,6 +19,7 @@ export default class DnDPlugin extends Plugin {
 	registerAttributesTablePostProcessor = registerAttributesTablePostProcessor;
 	registerHTMLAttributesPostProcessor = registerHTMLAttributesPostProcessor;
 	registerTextIndentPostProcessor = registerTextIndentPostProcessor;
+	registerTextIndentExtension = registerTextIndentExtension;
 	loadData = loadData;
 	saveData = saveData;
 	addAssetsStyles = addAssetsStyles;
@@ -36,6 +38,8 @@ export default class DnDPlugin extends Plugin {
 		await this.registerHTMLAttributesPostProcessor();
 
 		await this.registerTextIndentPostProcessor();
+
+		this.registerTextIndentExtension();
 	}
 
 	onunload() {
