@@ -2,7 +2,7 @@ import DnDPlugin from "./main";
 
 const ATTRIBUTES_REGEX = /^\{\^* *([^}\n ][^}\n]*) *}$/;
 
-export async function registerHTMLAttributesPostProcessor(this: DnDPlugin) {
+export function registerHTMLAttributesPostProcessor(this: DnDPlugin) {
 	this.registerMarkdownPostProcessor((element) => {
 		element.querySelectorAll('code').forEach((el) => {
 			const text = el.textContent!;

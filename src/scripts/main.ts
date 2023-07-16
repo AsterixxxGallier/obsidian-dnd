@@ -15,31 +15,25 @@ export default class DnDPlugin extends Plugin {
 		return this.data.settings;
 	}
 
-	registerDescriptionListPostProcessor = registerDescriptionListPostProcessor;
-	registerAttributesTablePostProcessor = registerAttributesTablePostProcessor;
-	registerHTMLAttributesPostProcessor = registerHTMLAttributesPostProcessor;
-	registerTextIndentPostProcessor = registerTextIndentPostProcessor;
-	registerTextIndentExtension = registerTextIndentExtension;
 	loadData = loadData;
 	saveData = saveData;
-	addAssetsStyles = addAssetsStyles;
 
 	async onload() {
 		await this.loadData();
 
 		this.addSettingTab(new SettingTab(this.app, this));
 
-		await this.addAssetsStyles();
+		await addAssetsStyles.call(this);
 
-		await this.registerDescriptionListPostProcessor();
+		registerDescriptionListPostProcessor.call(this);
 
-		await this.registerAttributesTablePostProcessor();
+		registerAttributesTablePostProcessor.call(this);
 
-		await this.registerHTMLAttributesPostProcessor();
+		registerHTMLAttributesPostProcessor.call(this);
 
-		await this.registerTextIndentPostProcessor();
+		registerTextIndentPostProcessor.call(this);
 
-		this.registerTextIndentExtension();
+		registerTextIndentExtension.call(this);
 	}
 
 	onunload() {

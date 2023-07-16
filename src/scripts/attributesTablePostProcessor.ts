@@ -1,6 +1,6 @@
 import DnDPlugin from "./main";
 
-export async function registerAttributesTablePostProcessor(this: DnDPlugin) {
+export function registerAttributesTablePostProcessor(this: DnDPlugin) {
 	this.registerMarkdownCodeBlockProcessor('attributes', (source, el) => {
 		const scores = source.split('/').map(s => s.trim());
 		console.assert(scores.length == 6);

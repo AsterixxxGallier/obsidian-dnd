@@ -1,7 +1,7 @@
 import {MarkdownRenderChild} from "obsidian";
 import DnDPlugin from "./main";
 
-export async function registerDescriptionListPostProcessor(this: DnDPlugin) {
+export function registerDescriptionListPostProcessor(this: DnDPlugin) {
 	this.registerMarkdownPostProcessor((element, context) => {
 		const lists = element.querySelectorAll('ul');
 		for (let i = 0; i < lists.length; i++) {

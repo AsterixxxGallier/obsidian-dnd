@@ -1,6 +1,6 @@
 import DnDPlugin from "./main";
 
-export async function registerTextIndentPostProcessor(this: DnDPlugin) {
+export function registerTextIndentPostProcessor(this: DnDPlugin) {
 	this.registerMarkdownPostProcessor((element) => {
 		const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
 
