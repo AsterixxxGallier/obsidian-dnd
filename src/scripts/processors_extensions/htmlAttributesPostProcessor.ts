@@ -1,5 +1,6 @@
 import DnDPlugin from "../main";
 
+// CREDIT: https://github.com/javalent/markdown-attributes/blob/main/src/processor.ts#L10
 const ATTRIBUTES_REGEX = /^\{\^* *([^}\n ][^}\n]*) *}$/;
 
 export function registerHTMLAttributesPostProcessor(this: DnDPlugin) {
