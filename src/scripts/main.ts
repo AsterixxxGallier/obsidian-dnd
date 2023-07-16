@@ -2,6 +2,7 @@ import {Plugin} from 'obsidian';
 import {registerDescriptionListPostProcessor} from './descriptionListPostProcessor';
 import {registerAttributesTablePostProcessor} from './attributesTablePostProcessor';
 import {registerHTMLAttributesPostProcessor} from './htmlAttributesPostProcessor';
+import {registerTextIndentPostProcessor} from './textIndentPostProcessor';
 import {Data, Settings, SettingTab, loadData, saveData} from './data';
 import {addAssetsStyles} from './assetsStyles';
 
@@ -16,6 +17,7 @@ export default class DnDPlugin extends Plugin {
 	registerDescriptionListPostProcessor = registerDescriptionListPostProcessor;
 	registerAttributesTablePostProcessor = registerAttributesTablePostProcessor;
 	registerHTMLAttributesPostProcessor = registerHTMLAttributesPostProcessor;
+	registerTextIndentPostProcessor = registerTextIndentPostProcessor;
 	loadData = loadData;
 	saveData = saveData;
 	addAssetsStyles = addAssetsStyles;
@@ -32,6 +34,8 @@ export default class DnDPlugin extends Plugin {
 		await this.registerAttributesTablePostProcessor();
 
 		await this.registerHTMLAttributesPostProcessor();
+
+		await this.registerTextIndentPostProcessor();
 	}
 
 	onunload() {

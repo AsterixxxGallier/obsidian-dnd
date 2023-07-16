@@ -3,7 +3,8 @@ import DnDPlugin from "./main";
 
 export interface Settings {
 	descriptionListSeparator: string,
-	attributes: string[]
+	attributes: string[],
+	textIndentPrefix: string,
 }
 
 export interface Data {
@@ -12,7 +13,8 @@ export interface Data {
 
 const DEFAULT_SETTINGS: Settings = {
 	descriptionListSeparator: '::',
-	attributes: ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA']
+	attributes: ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'],
+	textIndentPrefix: '~ ',
 }
 
 const DEFAULT_DATA: Data = {
