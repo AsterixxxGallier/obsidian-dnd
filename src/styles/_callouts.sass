@@ -14,8 +14,11 @@
 	.callout-content
 		margin-top: 1em
 
-	p, table
-		margin: 0
+		p:first-child, table:first-child
+			margin-top: 0
+
+		p:last-child, table:last-child
+			margin-bottom: 0
 
 // for callouts with box shadow (stat blocks) in edit mode, creates buggy behaviour
 //.markdown-source-view.mod-cm6 .cm-content > .cm-callout
