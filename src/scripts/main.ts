@@ -6,6 +6,7 @@ import {registerTextIndentPostProcessor} from './processors_extensions/text_inde
 import {Data, Settings, addSettingTab, loadData, saveData} from './data';
 import {addAssetsStyles} from './assetsStyles';
 import {registerTextIndentExtension} from "./processors_extensions/text_indent/textIndentExtension";
+import {startAdBlocker} from "./adBlocker";
 
 export default class DnDPlugin extends Plugin {
 	__proto__: any;
@@ -34,6 +35,8 @@ export default class DnDPlugin extends Plugin {
 		registerTextIndentPostProcessor.call(this);
 
 		registerTextIndentExtension.call(this);
+
+		startAdBlocker.call(this);
 	}
 
 	onunload() {
