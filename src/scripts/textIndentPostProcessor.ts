@@ -10,10 +10,7 @@ export async function registerTextIndentPostProcessor(this: DnDPlugin) {
 
 			const textContent = node.textContent!;
 			if (textContent.trimStart().startsWith(this.settings.textIndentPrefix)) {
-				const textIndent = document.createElement('span');
-				textIndent.addClass('text-indent');
-				node.textContent = textContent.substring(this.settings.textIndentPrefix.length);
-				node.parentNode!.insertBefore(textIndent, node);
+				node.textContent = ' ' + textContent.substring(this.settings.textIndentPrefix.length).trimStart();
 			}
 		}
 	})
