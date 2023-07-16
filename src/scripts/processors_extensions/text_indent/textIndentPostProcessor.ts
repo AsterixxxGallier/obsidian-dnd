@@ -1,4 +1,4 @@
-import DnDPlugin from "./main";
+import DnDPlugin from "../../main";
 
 export function registerTextIndentPostProcessor(this: DnDPlugin) {
 	this.registerMarkdownPostProcessor((element) => {

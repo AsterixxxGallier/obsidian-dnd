@@ -1,5 +1,5 @@
 import {MarkdownRenderChild} from "obsidian";
-import DnDPlugin from "./main";
+import DnDPlugin from "../main";
 
 export function registerDescriptionListPostProcessor(this: DnDPlugin) {
 	this.registerMarkdownPostProcessor((element, context) => {

@@ -1,4 +1,4 @@
-import DnDPlugin from "./main";
+import DnDPlugin from "../main";
 
 const ATTRIBUTES_REGEX = /^\{\^* *([^}\n ][^}\n]*) *}$/;
 

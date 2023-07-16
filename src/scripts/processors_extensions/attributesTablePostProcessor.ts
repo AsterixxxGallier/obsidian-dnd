@@ -1,4 +1,4 @@
-import DnDPlugin from "./main";
+import DnDPlugin from "../main";
 
 export function registerAttributesTablePostProcessor(this: DnDPlugin) {
 	this.registerMarkdownCodeBlockProcessor('attributes', (source, el) => {

@@ -9,7 +9,7 @@ import {
 	ViewUpdate,
 } from '@codemirror/view';
 import {TextIndentWidget} from './textIndentWidget';
-import DnDPlugin from "./main";
+import DnDPlugin from "../../main";
 
 class TextIndentExtension implements PluginValue {
 	decorations: DecorationSet;

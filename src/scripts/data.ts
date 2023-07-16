@@ -43,3 +43,7 @@ export class SettingTab extends PluginSettingTab {
 		containerEl.empty();
 	}
 }
+
+export function addSettingTab(this: DnDPlugin) {
+	this.addSettingTab(new SettingTab(this.app, this));
+}

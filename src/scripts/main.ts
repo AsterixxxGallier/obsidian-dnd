@@ -1,11 +1,11 @@
 import {Plugin} from 'obsidian';
-import {registerDescriptionListPostProcessor} from './descriptionListPostProcessor';
-import {registerAttributesTablePostProcessor} from './attributesTablePostProcessor';
-import {registerHTMLAttributesPostProcessor} from './htmlAttributesPostProcessor';
-import {registerTextIndentPostProcessor} from './textIndentPostProcessor';
-import {Data, Settings, SettingTab, loadData, saveData} from './data';
+import {registerDescriptionListPostProcessor} from './processors_extensions/descriptionListPostProcessor';
+import {registerAttributesTablePostProcessor} from './processors_extensions/attributesTablePostProcessor';
+import {registerHTMLAttributesPostProcessor} from './processors_extensions/htmlAttributesPostProcessor';
+import {registerTextIndentPostProcessor} from './processors_extensions/text_indent/textIndentPostProcessor';
+import {Data, Settings, addSettingTab, loadData, saveData} from './data';
 import {addAssetsStyles} from './assetsStyles';
-import {registerTextIndentExtension} from "./textIndentExtension";
+import {registerTextIndentExtension} from "./processors_extensions/text_indent/textIndentExtension";
 
 export default class DnDPlugin extends Plugin {
 	__proto__: any;
@@ -21,7 +21,7 @@ export default class DnDPlugin extends Plugin {
 	async onload() {
 		await this.loadData();
 
-		this.addSettingTab(new SettingTab(this.app, this));
+		addSettingTab.call(this);
 
 		await addAssetsStyles.call(this);
 
