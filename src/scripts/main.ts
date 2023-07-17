@@ -3,13 +3,13 @@ import {registerDescriptionListPostProcessor} from './processors_extensions/desc
 import {registerAttributesTablePostProcessor} from './processors_extensions/attributesTablePostProcessor';
 import {registerHTMLAttributesPostProcessor} from './processors_extensions/htmlAttributesPostProcessor';
 import {registerTextIndentPostProcessor} from './processors_extensions/text_indent/textIndentPostProcessor';
-import {Data, Settings, addSettingTab, loadData, saveData} from './data';
+import {addSettingTab, Data, loadData, saveData, Settings} from './data';
 import {addAssetsStyles} from './assetsStyles';
 import {registerTextIndentExtension} from './processors_extensions/text_indent/textIndentExtension';
+import {addMixRibbonIcon, registerMixView} from './mix/mixView';
 import {startAdBlocker} from './adBlocker';
 import {registerWebBrowserView} from './web/webBrowserView';
-import {registerHTMLFileView} from './web/htmlFileView';
-import {registerHTMLFileExtensions} from './web/htmlFileView';
+import {registerHTMLFileExtensions, registerHTMLFileView} from './web/htmlFileView';
 import {addSearchHeaderBarToNewTabView} from './web/searchHeaderBar';
 import {addOpenFunctionHook, removeOpenFunctionHook} from './web/openFunctionHook';
 
@@ -33,6 +33,8 @@ export default class DnDPlugin extends Plugin {
 		registerHTMLAttributesPostProcessor.call(this);
 		registerTextIndentPostProcessor.call(this);
 		registerTextIndentExtension.call(this);
+		registerMixView.call(this);
+		addMixRibbonIcon.call(this);
 		startAdBlocker.call(this);
 		registerWebBrowserView.call(this);
 		registerHTMLFileView.call(this);

@@ -1,15 +1,9 @@
 import {syntaxTree} from '@codemirror/language';
-import {EditorSelection, RangeSetBuilder} from '@codemirror/state';
-import {
-	Decoration,
-	DecorationSet,
-	EditorView,
-	PluginValue,
-	ViewPlugin,
-	ViewUpdate,
-} from '@codemirror/view';
+import {RangeSetBuilder} from '@codemirror/state';
+import {Decoration, DecorationSet, EditorView, PluginValue, ViewPlugin, ViewUpdate,} from '@codemirror/view';
 import {TextIndentWidget} from './textIndentWidget';
 import DnDPlugin from "../../main";
+import {selectionAndRangeOverlap} from "../../utils";
 
 class TextIndentExtension implements PluginValue {
 	decorations: DecorationSet;
@@ -61,20 +55,6 @@ class TextIndentExtension implements PluginValue {
 
 		return builder.finish();
 	}
-}
-
-function selectionAndRangeOverlap(
-	selection: EditorSelection,
-	from: number,
-	to: number
-) {
-	for (const range of selection.ranges) {
-		if (range.from <= to && range.to >= from) {
-			return true;
-		}
-	}
-
-	return false;
 }
 
 export function registerTextIndentExtension(this: DnDPlugin) {
