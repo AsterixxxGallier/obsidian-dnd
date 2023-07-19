@@ -100,6 +100,10 @@ export class Mix {
 			console.warn('Attempted to switch to next track, but there are no playlists');
 			return;
 		}
+		if (this.states.every((state) => state.proportion == 0)) {
+			console.warn('Attempted to switch to next track, but all proportions are zero');
+			return;
+		}
 		if (this.activePlaylist != undefined) {
 			const state = this.states.find((state) => state.playlistIndex == this.activePlaylist)!;
 			state.playTime += this.playlists[state.playlistIndex].tracks[state.trackIndices[state.currentTrack]].duration;
