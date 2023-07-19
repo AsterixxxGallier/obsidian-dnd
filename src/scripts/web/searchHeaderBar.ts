@@ -40,7 +40,7 @@ export class SearchHeaderBar {
 		if (url.startsWith(start)) {
 			url = url.substring(start.length);
 		}
-		this.searchBar.value = url;
+		this.searchBar.value = decodeURIComponent(url);
 	}
 
 	focus() {
@@ -60,7 +60,7 @@ export function addSearchHeaderBarToNewTabView(this: DnDPlugin) {
 					// Focus on current inputEl
 					headerBar.focus();
 					headerBar.addOnSearchBarEnterListener(async (url: string) => {
-						await WebBrowserView.spawnWebBrowserView(false, {url});
+						await WebBrowserView.spawnWebBrowserView(false, {url, tracking: false});
 					});
 				}
 			}

@@ -17,7 +17,7 @@ export class HTMLFileView extends FileView {
 	async onLoadFile(file: TFile): Promise<void> {
 		const adapter = this.app.vault.adapter as FileSystemAdapter;
 		const urlString = 'file:///' + (adapter.getBasePath() + '/' + file.path).toString().replace(/\s/g, '%20');
-		await WebBrowserView.spawnWebBrowserView(true, {url: urlString});
+		await WebBrowserView.spawnWebBrowserView(true, {url: urlString, tracking: false});
 		if (this.leaf) this.leaf.detach();
 	}
 

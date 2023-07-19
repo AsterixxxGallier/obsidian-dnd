@@ -27,7 +27,7 @@ export function addOpenFunctionHook() {
 		}
 
 		// TODO: Open external link in current leaf when meta key isn't being held down.
-		WebBrowserView.spawnWebBrowserView(true, {url: urlString}).then(() => {});
+		WebBrowserView.spawnWebBrowserView(true, {url: urlString, tracking: false}).then(() => {});
 		return null;
 	}
 }

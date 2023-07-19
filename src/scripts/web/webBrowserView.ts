@@ -2,8 +2,11 @@
 
 import DnDPlugin from '../main';
 
-import {ItemView, ViewStateResult} from 'obsidian';
+import {EventRef, ItemView, MarkdownView, Menu, ViewStateResult} from 'obsidian';
 import {SearchHeaderBar} from './searchHeaderBar';
+import {EditorView} from "@codemirror/view";
+import {syntaxTree} from "@codemirror/language";
+import {SyntaxNodeRef} from "@lezer/common";
 
 export const WEB_BROWSER_VIEW_ID = 'web-browser-view';
 
@@ -14,6 +17,10 @@ export class WebBrowserView extends ItemView {
 	private headerBar: SearchHeaderBar;
 	private favicon: HTMLImageElement;
 	private frame: HTMLIFrameElement;
+
+	private tracking: boolean;
+	private layoutChangeEventRef: EventRef | null = null;
+	private activeLeafChangeEventRef: EventRef | null = null;
 
 	static async spawnWebBrowserView(newLeaf: boolean, state: WebBrowserViewState) {
 		const leaf = app.workspace.getLeaf(newLeaf);
@@ -26,6 +33,130 @@ export class WebBrowserView extends ItemView {
 
 	getViewType(): string {
 		return WEB_BROWSER_VIEW_ID;
+	}
+
+	onPaneMenu(menu: Menu, source: "more-options" | "tab-header" | string) {
+		super.onPaneMenu(menu, source);
+		menu.addItem((item) =>
+			item
+				.setSection('pane')
+				.setIcon('footprints')
+				.setTitle('Track the active file with this website')
+				.setChecked(this.tracking)
+				.onClick(async () => {
+					if (this.tracking) {
+						this.stopTracking();
+					} else {
+						await this.startTracking();
+					}
+				})
+		);
+		const file = app.workspace.getActiveFile();
+		if (file !== null) {
+			const fandom = app.metadataCache.getFileCache(file)?.frontmatter?.['fandom'];
+			if (!fandom) {
+				const view = app.workspace
+					.getLeavesOfType('markdown')
+					.map(leaf => <MarkdownView> leaf.view)
+					.find(view => view.file == file);
+				if (view !== undefined) {
+					menu.addItem((item) =>
+						item
+							.setSection('pane')
+							.setIcon('link')
+							.setTitle('Associate the active file with this website')
+							.onClick(() => {
+								// const content = view.editor.getValue();
+								// @ts-ignore
+								const editorView = <EditorView>view.editor.cm;
+								let beforeFrontmatterEnd: number | undefined = undefined;
+								let frontmatterOpened = false;
+								syntaxTree(editorView.state).iterate({
+									enter(node: SyntaxNodeRef): boolean | void {
+										if (node.type.name === 'def_hmd-frontmatter') {
+											if (frontmatterOpened) {
+												beforeFrontmatterEnd = node.from;
+											} else {
+												frontmatterOpened = true;
+											}
+										}
+									}
+								});
+								const start = 'https://forgottenrealms.fandom.com/wiki/';
+								let url = this.currentUrl;
+								if (url.startsWith(start)) {
+									url = url.substring(start.length);
+								} else {
+									console.warn('Current URL is not a Forgotten Realms Fandom URL: ' + url);
+									return;
+								}
+								let text;
+								let pos;
+								if (beforeFrontmatterEnd == undefined) {
+									// create frontmatter
+									text = `---\nfandom: ${url}\n---\n\n`;
+									pos = {line: 0, ch: 0};
+								} else {
+									// amend existing frontmatter
+									text = `fandom: ${url}\n`;
+									const line = editorView.state.doc.lineAt(beforeFrontmatterEnd);
+									pos = {line: line.number - 1, ch: beforeFrontmatterEnd - line.from};
+								}
+								view.editor.replaceRange(text, pos);
+								// view.editor.setCursor(pos);
+								// view.editor.replaceSelection(amendment);
+								// view.editor.setSelection(view.editor.getCursor('anchor'), pos);
+								// view.editor.focus();
+							})
+					);
+				}
+			}
+		}
+	}
+
+	private async startTracking() {
+		this.tracking = true;
+		this.layoutChangeEventRef = app.workspace.on('layout-change', async () => await this.track());
+		this.activeLeafChangeEventRef = app.workspace.on('active-leaf-change', async () => await this.track());
+		await this.track();
+	}
+
+	private stopTracking() {
+		this.tracking = false;
+		app.workspace.offref(this.layoutChangeEventRef!);
+		app.workspace.offref(this.activeLeafChangeEventRef!);
+	}
+
+	protected onClose() {
+		if (this.tracking) {
+			this.stopTracking();
+		}
+		return super.onClose();
+	}
+
+	private async track() {
+		const file = app.workspace.getActiveFile();
+		if (file == null) {
+			console.warn('Could not track with web view because the active file is null');
+			return;
+		}
+		const metadata = app.metadataCache.getFileCache(file);
+		if (metadata == null) {
+			console.warn("Could not track with web view because the active file's cached metadata is null");
+			return;
+		}
+		let fandom = metadata.frontmatter?.['fandom'];
+		// if (fandom == undefined) {
+		// 	console.warn("Could not track with web view because the active file's frontmatter does not contain 'fandom' property");
+		// 	return;
+		// }
+		if (fandom == undefined) {
+			fandom = 'Special:Search?query=' + encodeURIComponent(file.basename);
+		}
+		const url = 'https://forgottenrealms.fandom.com/wiki/' + fandom;
+		if (this.currentUrl != url) {
+			await this.setState({url, tracking: true}, {});
+		}
 	}
 
 	async onOpen() {
@@ -96,7 +227,7 @@ export class WebBrowserView extends ItemView {
 
 			// Open new browser tab if the web view requests it.
 			webContents.setWindowOpenHandler(async (event: any) => {
-				await WebBrowserView.spawnWebBrowserView(true, {url: event.url});
+				await WebBrowserView.spawnWebBrowserView(true, {url: event.url, tracking: false});
 			});
 
 			// For getting keyboard event from webview
@@ -162,10 +293,15 @@ export class WebBrowserView extends ItemView {
 
 	async setState(state: WebBrowserViewState, result: ViewStateResult) {
 		this.navigate(state.url, false);
+		if (this.tracking && !state.tracking) {
+			this.stopTracking();
+		} else if (!this.tracking && state.tracking) {
+			await this.startTracking();
+		}
 	}
 
 	getState(): WebBrowserViewState {
-		return {url: this.currentUrl};
+		return {url: this.currentUrl, tracking: this.tracking};
 	}
 
 	navigate(url: string, addToHistory: boolean = true, updateWebView: boolean = true) {
@@ -192,7 +328,7 @@ export class WebBrowserView extends ItemView {
 		// TODO: ?Should we support Localhost?
 		// And the before one is : /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi; which will only match `blabla.blabla`
 		// Support 192.168.0.1 for some local software server, and localhost
-		const urlRegEx = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#?&/=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/= ]*)$/g;
+		const urlRegEx = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#?&/=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=']*)$/g;
 		if (urlRegEx.test(url)) {
 			const first7 = url.slice(0, 7).toLowerCase();
 			const first8 = url.slice(0, 8).toLowerCase();
@@ -218,6 +354,7 @@ export class WebBrowserView extends ItemView {
 
 class WebBrowserViewState {
 	url: string;
+	tracking: boolean;
 }
 
 export function registerWebBrowserView(this: DnDPlugin) {
