@@ -7,11 +7,12 @@ import {addSettingTab, Data, loadData, saveData, Settings} from './data';
 import {addAssetsStyles} from './assetsStyles';
 import {registerTextIndentExtension} from './processors_extensions/text_indent/textIndentExtension';
 import {addMixRibbonIcon, registerMixView} from './mix/mixView';
-import {startAdBlocker} from './adBlocker';
+import {startAdBlocker} from './web/adBlocker';
 import {registerWebBrowserView} from './web/webBrowserView';
 import {registerHTMLFileExtensions, registerHTMLFileView} from './web/htmlFileView';
 import {addSearchHeaderBarToNewTabView} from './web/searchHeaderBar';
 import {addOpenFunctionHook, removeOpenFunctionHook} from './web/openFunctionHook';
+import {registerWikiBrowserView} from "./web/wikiBrowserView";
 
 export default class DnDPlugin extends Plugin {
 	__proto__: any;
@@ -35,8 +36,9 @@ export default class DnDPlugin extends Plugin {
 		registerTextIndentExtension.call(this);
 		registerMixView.call(this);
 		addMixRibbonIcon.call(this);
-		startAdBlocker.call(this);
+		await startAdBlocker.call(this);
 		registerWebBrowserView.call(this);
+		registerWikiBrowserView.call(this);
 		registerHTMLFileView.call(this);
 		registerHTMLFileExtensions.call(this);
 		addSearchHeaderBarToNewTabView.call(this);

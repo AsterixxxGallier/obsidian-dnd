@@ -3,12 +3,14 @@
 import DnDPlugin from "../main";
 import {ItemView} from "obsidian";
 import {WebBrowserView} from "./webBrowserView";
+import {data} from "../data";
+import {WikiBrowserView} from "./wikiBrowserView";
 
 export class SearchHeaderBar {
 	private searchBar: HTMLInputElement;
 	private onSearchBarEnterListener = new Array<(url: string) => void>;
 
-	constructor(parent: Element) {
+	constructor(parent: Element, placeholder: string) {
 		// CSS class removes the gradient at the right of the header bar.
 		parent.addClass("web-browser-header-bar");
 		// Remove default title from header bar.
@@ -17,7 +19,7 @@ export class SearchHeaderBar {
 		// Create search bar in header bar.
 		this.searchBar = document.createElement("input");
 		this.searchBar.type = "text";
-		this.searchBar.placeholder = "Search on the Forgotten Realms Fandom or enter address"
+		this.searchBar.placeholder = placeholder;
 		this.searchBar.addClass("web-browser-search-bar");
 		parent.appendChild(this.searchBar);
 
@@ -35,12 +37,12 @@ export class SearchHeaderBar {
 		this.onSearchBarEnterListener.push(listener);
 	}
 
-	setSearchBarUrl(url: string) {
-		const start = 'https://forgottenrealms.fandom.com/wiki/';
-		if (url.startsWith(start)) {
-			url = url.substring(start.length);
-		}
-		this.searchBar.value = decodeURIComponent(url);
+	setSearchBarURL(url: string) {
+		this.searchBar.value = url;
+	}
+
+	setSearchBarPlaceholder(text: string) {
+		this.searchBar.placeholder = text;
 	}
 
 	focus() {
@@ -56,11 +58,38 @@ export function addSearchHeaderBarToNewTabView(this: DnDPlugin) {
 			if (activeView.contentEl.children[0].hasClass("empty-state")) {
 				// Check if the "New tab" view has already been processed and has a header bar already.
 				if (!activeView.headerEl.children[2].hasClass("web-browser-header-bar")) {
-					const headerBar = new SearchHeaderBar(activeView.headerEl.children[2]);
+					const headerBar = new SearchHeaderBar(activeView.headerEl.children[2], 'Search or enter address');
 					// Focus on current inputEl
 					headerBar.focus();
-					headerBar.addOnSearchBarEnterListener(async (url: string) => {
-						await WebBrowserView.spawnWebBrowserView(false, {url, tracking: false});
+					headerBar.addOnSearchBarEnterListener(async (input: string) => {
+						for (const [id, wiki] of Object.entries(data.websites)) {
+							if (input.startsWith(wiki.shortName + ':')) {
+								await WikiBrowserView.spawnWikiBrowserView(false, {
+									wiki: id,
+									page: input.substring(wiki.shortName.length + 1).trim(),
+									tracking: false,
+								});
+								return;
+							}
+						}
+						let url = input;
+						// Support both http:// and https://
+						// TODO: ?Should we support Localhost?
+						// And the before one is : /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi; which will only match `blabla.blabla`
+						// Support 192.168.0.1 for some local software server, and localhost
+						const urlRegEx = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#?&/=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=']*)$/g;
+						if (urlRegEx.test(input)) {
+							const first7 = input.slice(0, 7).toLowerCase();
+							const first8 = input.slice(0, 8).toLowerCase();
+							if (!(first7 === "http://" || first7 === "file://" || first8 === "https://")) {
+								url = "https://" + input;
+							}
+						} else if (!(input.slice(0, 7) === "file://") || !(/\.htm(l)?$/g.test(input))) {
+							// If input is not a valid FILE url, search it with search engine.
+							// TODO: Support other search engines.
+							url = "https://duckduckgo.com/?q=" + encodeURIComponent(input);
+						}
+						await WebBrowserView.spawnWebBrowserView(false, {url});
 					});
 				}
 			}

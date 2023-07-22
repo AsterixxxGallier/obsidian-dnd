@@ -2,28 +2,27 @@
 
 import DnDPlugin from '../main';
 
-import {EventRef, ItemView, MarkdownView, Menu, ViewStateResult} from 'obsidian';
+import {ItemView, ViewStateResult, WorkspaceLeaf} from 'obsidian';
 import {SearchHeaderBar} from './searchHeaderBar';
-import {EditorView} from "@codemirror/view";
-import {syntaxTree} from "@codemirror/language";
-import {SyntaxNodeRef} from "@lezer/common";
+import {data, getScript} from "../data";
+import {WikiBrowserView} from "./wikiBrowserView";
 
 export const WEB_BROWSER_VIEW_ID = 'web-browser-view';
 
 export class WebBrowserView extends ItemView {
-	private currentUrl: string;
+	private currentURL: string;
 	private currentTitle: string = 'New tab';
 
 	private headerBar: SearchHeaderBar;
 	private favicon: HTMLImageElement;
 	private frame: HTMLIFrameElement;
 
-	private tracking: boolean;
-	private layoutChangeEventRef: EventRef | null = null;
-	private activeLeafChangeEventRef: EventRef | null = null;
-
 	static async spawnWebBrowserView(newLeaf: boolean, state: WebBrowserViewState) {
 		const leaf = app.workspace.getLeaf(newLeaf);
+		await this.spawnWebBrowserViewInLeaf(leaf, state);
+	}
+
+	static async spawnWebBrowserViewInLeaf(leaf: WorkspaceLeaf, state: WebBrowserViewState) {
 		await leaf.setViewState({type: WEB_BROWSER_VIEW_ID, active: true, state});
 	}
 
@@ -35,138 +34,14 @@ export class WebBrowserView extends ItemView {
 		return WEB_BROWSER_VIEW_ID;
 	}
 
-	onPaneMenu(menu: Menu, source: "more-options" | "tab-header" | string) {
-		super.onPaneMenu(menu, source);
-		menu.addItem((item) =>
-			item
-				.setSection('pane')
-				.setIcon('footprints')
-				.setTitle('Track the active file with this website')
-				.setChecked(this.tracking)
-				.onClick(async () => {
-					if (this.tracking) {
-						this.stopTracking();
-					} else {
-						await this.startTracking();
-					}
-				})
-		);
-		const file = app.workspace.getActiveFile();
-		if (file !== null) {
-			const fandom = app.metadataCache.getFileCache(file)?.frontmatter?.['fandom'];
-			if (!fandom) {
-				const view = app.workspace
-					.getLeavesOfType('markdown')
-					.map(leaf => <MarkdownView> leaf.view)
-					.find(view => view.file == file);
-				if (view !== undefined) {
-					menu.addItem((item) =>
-						item
-							.setSection('pane')
-							.setIcon('link')
-							.setTitle('Associate the active file with this website')
-							.onClick(() => {
-								// const content = view.editor.getValue();
-								// @ts-ignore
-								const editorView = <EditorView>view.editor.cm;
-								let beforeFrontmatterEnd: number | undefined = undefined;
-								let frontmatterOpened = false;
-								syntaxTree(editorView.state).iterate({
-									enter(node: SyntaxNodeRef): boolean | void {
-										if (node.type.name === 'def_hmd-frontmatter') {
-											if (frontmatterOpened) {
-												beforeFrontmatterEnd = node.from;
-											} else {
-												frontmatterOpened = true;
-											}
-										}
-									}
-								});
-								const start = 'https://forgottenrealms.fandom.com/wiki/';
-								let url = this.currentUrl;
-								if (url.startsWith(start)) {
-									url = url.substring(start.length);
-								} else {
-									console.warn('Current URL is not a Forgotten Realms Fandom URL: ' + url);
-									return;
-								}
-								let text;
-								let pos;
-								if (beforeFrontmatterEnd == undefined) {
-									// create frontmatter
-									text = `---\nfandom: ${url}\n---\n\n`;
-									pos = {line: 0, ch: 0};
-								} else {
-									// amend existing frontmatter
-									text = `fandom: ${url}\n`;
-									const line = editorView.state.doc.lineAt(beforeFrontmatterEnd);
-									pos = {line: line.number - 1, ch: beforeFrontmatterEnd - line.from};
-								}
-								view.editor.replaceRange(text, pos);
-								// view.editor.setCursor(pos);
-								// view.editor.replaceSelection(amendment);
-								// view.editor.setSelection(view.editor.getCursor('anchor'), pos);
-								// view.editor.focus();
-							})
-					);
-				}
-			}
-		}
-	}
-
-	private async startTracking() {
-		this.tracking = true;
-		this.layoutChangeEventRef = app.workspace.on('layout-change', async () => await this.track());
-		this.activeLeafChangeEventRef = app.workspace.on('active-leaf-change', async () => await this.track());
-		await this.track();
-	}
-
-	private stopTracking() {
-		this.tracking = false;
-		app.workspace.offref(this.layoutChangeEventRef!);
-		app.workspace.offref(this.activeLeafChangeEventRef!);
-	}
-
-	protected onClose() {
-		if (this.tracking) {
-			this.stopTracking();
-		}
-		return super.onClose();
-	}
-
-	private async track() {
-		const file = app.workspace.getActiveFile();
-		if (file == null) {
-			console.warn('Could not track with web view because the active file is null');
-			return;
-		}
-		const metadata = app.metadataCache.getFileCache(file);
-		if (metadata == null) {
-			console.warn("Could not track with web view because the active file's cached metadata is null");
-			return;
-		}
-		let fandom = metadata.frontmatter?.['fandom'];
-		// if (fandom == undefined) {
-		// 	console.warn("Could not track with web view because the active file's frontmatter does not contain 'fandom' property");
-		// 	return;
-		// }
-		if (fandom == undefined) {
-			fandom = 'Special:Search?query=' + encodeURIComponent(file.basename);
-		}
-		const url = 'https://forgottenrealms.fandom.com/wiki/' + fandom;
-		if (this.currentUrl != url) {
-			await this.setState({url, tracking: true}, {});
-		}
-	}
-
 	async onOpen() {
-		// Don't allow views to replace this view.
-		this.navigation = false;
+		// Allow views to replace this view.
+		this.navigation = true;
 
 		this.contentEl.empty();
 
 		// Create search bar in the header bar.
-		this.headerBar = new SearchHeaderBar(this.headerEl.children[2]);
+		this.headerBar = new SearchHeaderBar(this.headerEl.children[2], 'Search or enter address');
 
 		// Create favicon image element.
 		this.favicon = document.createElement("img") as HTMLImageElement;
@@ -181,8 +56,8 @@ export class WebBrowserView extends ItemView {
 		this.contentEl.addClass("web-browser-view-content");
 		this.contentEl.appendChild(this.frame);
 
-		this.headerBar.addOnSearchBarEnterListener((url: string) => {
-			this.navigate(url);
+		this.headerBar.addOnSearchBarEnterListener(async (url: string) => {
+			await this.navigate(encodeURIComponent(url));
 		});
 
 		this.frame.addEventListener("dom-ready", () => {
@@ -193,41 +68,11 @@ export class WebBrowserView extends ItemView {
 			// webContents.on('console-message', (event, level, message) => {
 			// 	console.log('WebView console message (level ' + level + '): \n' + message);
 			// });
-			webContents.executeJavaScript(`
-				document.querySelectorAll(
-				    'div.top-ads-container\\
-				    ,div.bottom-ads-container\\
-				    ,div.global-navigation\\
-				    ,div.page-footer\\
-				    ,footer.global-footer\\\
-				    ,div#mixed-content-footer\\
-					,div#WikiaBar\\
-					,aside.page__right-rail\\
-					,div.fandom-sticky-header\\
-					,div.community-header-wrapper\\
-					,div.page-side-tools__wrapper\\
-					,div.page-header__actions\\
-					,div#scroll-banner\\
-					,div.page-header__languages\\
-					,div.notifications-placeholder\\
-					,div[itemprop="video"]'
-				).forEach(it => it.remove());
-				
-				const mainContainer = document.querySelector('div.main-container');
-				mainContainer.style.marginLeft = '0';
-				mainContainer.style.width = '100%';
-				
-				const background = document.querySelector('div.fandom-community-header__background.fullScreen');
-				background.style.width = '100%';
-				
-				const mainPage = document.querySelector('main.page__main');
-				mainPage.style.background = 'rgba(255, 255, 255, 0.9)';
-                mainPage.style.paddingTop = '24px';
-			`);
+			webContents.executeJavaScript(getScript(webContents.getURL()));
 
 			// Open new browser tab if the web view requests it.
 			webContents.setWindowOpenHandler(async (event: any) => {
-				await WebBrowserView.spawnWebBrowserView(true, {url: event.url, tracking: false});
+				await WebBrowserView.spawnWebBrowserView(true, {url: event.url});
 			});
 
 			// For getting keyboard event from webview
@@ -266,51 +111,39 @@ export class WebBrowserView extends ItemView {
 		});
 
 		this.frame.addEventListener("page-title-updated", (event: any) => {
-			let title = event.title;
-			const end = ' | Forgotten Realms Wiki | Fandom';
-			if (title.endsWith(end)) {
-				title = title.substring(0, title.length - end.length);
-			}
-			this.leaf.tabHeaderInnerTitleEl.innerText = title;
-			this.currentTitle = title;
+			this.leaf.tabHeaderInnerTitleEl.innerText = event.title;
+			this.currentTitle = event.title;
 		});
 
-		this.frame.addEventListener("will-navigate", (event: any) => {
-			this.navigate(event.url, true, false);
+		this.frame.addEventListener("will-navigate", async (event: any) => {
+			await this.navigate(event.url, true, false);
 		});
 
-		this.frame.addEventListener("did-navigate-in-page", (event: any) => {
-			this.navigate(event.url, true, false);
+		this.frame.addEventListener("did-navigate-in-page", async (event: any) => {
+			await this.navigate(event.url, true, false);
 		});
 
 		this.frame.addEventListener("new-window", (event: any) => {
 			console.log("Trying to open new window at url: " + event.url);
 			event.preventDefault();
 		});
-
-		console.log(this.frame);
 	}
 
 	async setState(state: WebBrowserViewState, result: ViewStateResult) {
-		this.navigate(state.url, false);
-		if (this.tracking && !state.tracking) {
-			this.stopTracking();
-		} else if (!this.tracking && state.tracking) {
-			await this.startTracking();
-		}
+		await this.navigate(state.url, false);
 	}
 
 	getState(): WebBrowserViewState {
-		return {url: this.currentUrl, tracking: this.tracking};
+		return {url: this.currentURL};
 	}
 
-	navigate(url: string, addToHistory: boolean = true, updateWebView: boolean = true) {
+	async navigate(url: string, addToHistory: boolean = true, updateWebView: boolean = true) {
 		if (url === "") {
 			return;
 		}
 
 		if (addToHistory) {
-			if (this.leaf.history.backHistory.last()?.state?.state?.url !== this.currentUrl) {
+			if (this.leaf.history.backHistory.last()?.state?.state?.url !== this.currentURL) {
 				this.leaf.history.backHistory.push({
 					state: {
 						type: WEB_BROWSER_VIEW_ID,
@@ -324,27 +157,19 @@ export class WebBrowserView extends ItemView {
 			}
 		}
 
-		// Support both http:// and https://
-		// TODO: ?Should we support Localhost?
-		// And the before one is : /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi; which will only match `blabla.blabla`
-		// Support 192.168.0.1 for some local software server, and localhost
-		const urlRegEx = /^(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._+~#?&/=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=']*)$/g;
-		if (urlRegEx.test(url)) {
-			const first7 = url.slice(0, 7).toLowerCase();
-			const first8 = url.slice(0, 8).toLowerCase();
-			if (!(first7 === "http://" || first7 === "file://" || first8 === "https://")) {
-				url = "https://" + url;
+		for (const [id, wiki] of Object.entries(data.websites)) {
+			if (url.startsWith(wiki.basePrefix)) {
+				await WikiBrowserView.spawnWikiBrowserViewInLeaf(this.leaf, {
+					wiki: id,
+					page: url.substring(wiki.basePrefix.length),
+					tracking: false,
+				});
+				return;
 			}
-		} else if (!(url.slice(0, 7) === "file://") || !(/\.htm(l)?$/g.test(url))) {
-			// If url is not a valid FILE url, search it with search engine.
-			// TODO: Support other search engines.
-			// url = "https://duckduckgo.com/?q=" + url;
-			console.warn(url + ' is not a real url, searching the Fandom now...');
-			url = "https://forgottenrealms.fandom.com/wiki/Special:Search?query=" + url;
 		}
 
-		this.currentUrl = url;
-		this.headerBar.setSearchBarUrl(url);
+		this.currentURL = url;
+		this.headerBar.setSearchBarURL(url);
 		if (updateWebView) {
 			this.frame.setAttribute("src", url);
 		}
@@ -354,7 +179,6 @@ export class WebBrowserView extends ItemView {
 
 class WebBrowserViewState {
 	url: string;
-	tracking: boolean;
 }
 
 export function registerWebBrowserView(this: DnDPlugin) {
