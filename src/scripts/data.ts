@@ -7,21 +7,29 @@ export interface Settings {
 	textIndentPrefix: string,
 }
 
-export interface Website {
-	id: string,
+export interface WebsiteDisplayInformation {
 	urlPattern: string,
-	titlePattern: string,
-	script: string,
-	searchPlaceholder: string,
-	searchPrefix: string,
-	pagePrefix: string | undefined,
+	titlePattern: string | undefined,
+	script: string | undefined,
 }
 
-type Websites = Website[];
+export interface SearchEngine {
+	id: string,
+	searchPlaceholder: string,
+	searchPrefix: string,
+}
+
+export interface Wiki {
+	id: string,
+	displayName: string,
+	pagePrefix: string,
+}
 
 export interface Data {
 	settings: Settings,
-	websites: Websites
+	websiteDisplayInformation: WebsiteDisplayInformation[],
+	searchEngines: SearchEngine[],
+	wikis: Wiki[],
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -30,9 +38,8 @@ const DEFAULT_SETTINGS: Settings = {
 	textIndentPrefix: '~ ',
 }
 
-const DEFAULT_WEBSITES: Websites = [
+const DEFAULT_WEBSITE_DISPLAY_INFORMATION: WebsiteDisplayInformation[] = [
 	{
-		id: 'duckduckgo',
 		urlPattern: 'duckduckgo.com',
 		titlePattern: '(?:site:\\S+ )?(.+?) at DuckDuckGo',
 		// language=JavaScript
@@ -41,12 +48,8 @@ const DEFAULT_WEBSITES: Websites = [
 				.forEach(el => el.parentElement.parentElement.parentElement.parentElement.parentElement.remove());
 			document.querySelectorAll('[data-testid="site-filter"]').forEach(el => el.remove());
 		`,
-		searchPlaceholder: 'Search with DuckDuckGo',
-		searchPrefix: 'https://duckduckgo.com/?q=',
-		pagePrefix: undefined,
 	},
 	{
-		id: 'fandom',
 		urlPattern: 'forgottenrealms.fandom.com',
 		titlePattern: '([^|]+) \\| Forgotten Realms Wiki \\| Fandom',
 		// language=JavaScript
@@ -81,12 +84,8 @@ const DEFAULT_WEBSITES: Websites = [
 			mainPage.style.background = 'rgba(255, 255, 255, 0.9)';
 			mainPage.style.paddingTop = '24px';
 		`,
-		searchPlaceholder: 'Search the Forgotten Realms Wiki',
-		searchPrefix: 'https://forgottenrealms.fandom.com/wiki/Special:Search?query=',
-		pagePrefix: 'https://forgottenrealms.fandom.com/wiki/',
 	},
 	{
-		id: 'wikidot',
 		urlPattern: 'wikidot.com',
 		titlePattern: '([^|]+) \- DND 5th Edition',
 		// language=JavaScript
@@ -112,22 +111,52 @@ const DEFAULT_WEBSITES: Websites = [
 			const mainContentWrap = document.querySelector('.main-content-wrap');
 			mainContentWrap.style.float = 'none';
 		`,
+	}
+]
+
+const DEFAULT_SEARCH_ENGINES: SearchEngine[] = [
+	{
+		id: 'd',
+		searchPlaceholder: 'Search with DuckDuckGo',
+		searchPrefix: 'https://duckduckgo.com/?q=',
+	},
+	{
+		id: 'f',
+		searchPlaceholder: 'Search the Forgotten Realms Wiki',
+		searchPrefix: 'https://forgottenrealms.fandom.com/wiki/Special:Search?query=',
+	},
+	{
+		id: 'w',
 		searchPlaceholder: 'Search the D&D 5th edition community wiki',
 		searchPrefix: 'https://duckduckgo.com/?q=site%3Adnd5e.wikidot.com+',
+	}
+]
+
+const DEFAULT_WIKIS: Wiki[] = [
+	{
+		id: 'fandom',
+		displayName: 'the Forgotten Realms Fandom',
+		pagePrefix: 'https://forgottenrealms.fandom.com/wiki/',
+	},
+	{
+		id: 'wikidot',
+		displayName: 'Wikidot',
 		pagePrefix: 'https://dnd5e.wikidot.com/',
 	}
 ]
 
 const DEFAULT_DATA: Data = {
 	settings: DEFAULT_SETTINGS,
-	websites: DEFAULT_WEBSITES,
+	websiteDisplayInformation: DEFAULT_WEBSITE_DISPLAY_INFORMATION,
+	searchEngines: DEFAULT_SEARCH_ENGINES,
+	wikis: DEFAULT_WIKIS,
 }
 
 export let data: Data;
 export let settings: Settings;
 
 export function getScript(url: string): string {
-	return Object.entries(data.scripts).find(([pattern]) => new RegExp(pattern).test(url))?.[1] ?? '';
+	return data.websiteDisplayInformation.find(website => new RegExp(website.urlPattern).test(url))?.script ?? '';
 }
 
 export async function loadData(this: DnDPlugin) {

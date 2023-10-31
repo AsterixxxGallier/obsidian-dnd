@@ -12,7 +12,6 @@ import {registerWebBrowserView} from './web/webBrowserView';
 import {registerHTMLFileExtensions, registerHTMLFileView} from './web/htmlFileView';
 import {addSearchHeaderBarToNewTabView} from './web/searchHeaderBar';
 import {addOpenFunctionHook, removeOpenFunctionHook} from './web/openFunctionHook';
-import {registerWikiBrowserView} from "./web/wikiBrowserView";
 
 export default class DnDPlugin extends Plugin {
 	__proto__: any;
@@ -38,7 +37,6 @@ export default class DnDPlugin extends Plugin {
 		addMixRibbonIcon.call(this);
 		await startAdBlocker.call(this);
 		registerWebBrowserView.call(this);
-		registerWikiBrowserView.call(this);
 		registerHTMLFileView.call(this);
 		registerHTMLFileExtensions.call(this);
 		addSearchHeaderBarToNewTabView.call(this);
