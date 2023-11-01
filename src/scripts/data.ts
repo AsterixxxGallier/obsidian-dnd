@@ -102,6 +102,7 @@ const DEFAULT_WEBSITE_DISPLAY_INFORMATION: WebsiteDisplayInformation[] = [
 			).forEach(it => it.remove());
 	
 			const contentContainer = document.querySelector('main > .content');
+            contentContainer.style.maxWidth = '970px';
 			if (getComputedStyle(contentContainer).top.startsWith('-')) {
 				contentContainer.style.top = '0';
 				contentContainer.style.marginTop = '20px';
@@ -110,6 +111,8 @@ const DEFAULT_WEBSITE_DISPLAY_INFORMATION: WebsiteDisplayInformation[] = [
 	
 			const mainContentWrap = document.querySelector('.main-content-wrap');
 			mainContentWrap.style.float = 'none';
+            mainContentWrap.classList.remove('col-md-9');
+            mainContentWrap.classList.add('col-md-12');
 		`,
 	}
 ]
