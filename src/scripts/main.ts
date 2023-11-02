@@ -12,6 +12,7 @@ import {registerWebBrowserView} from './web/webBrowserView';
 import {registerHTMLFileExtensions, registerHTMLFileView} from './web/htmlFileView';
 import {addSearchHeaderBarToNewTabView} from './web/searchHeaderBar';
 import {addOpenFunctionHook, removeOpenFunctionHook} from './web/openFunctionHook';
+import {test} from "./languageEngine";
 
 export default class DnDPlugin extends Plugin {
 	__proto__: any;
@@ -41,6 +42,7 @@ export default class DnDPlugin extends Plugin {
 		registerHTMLFileExtensions.call(this);
 		addSearchHeaderBarToNewTabView.call(this);
 		addOpenFunctionHook.call(this);
+		await test();
 	}
 
 	onunload() {
