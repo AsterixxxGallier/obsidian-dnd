@@ -44,21 +44,23 @@ export async function showPlayer(this: MixView) {
 		pauseButton.style.display = 'none';
 	}
 
-	playButton.onclick = async () => {
+	let play = async () => {
 		playButton.style.display = 'none';
 		pauseButton.style.removeProperty('display');
 		await this.audioElement.play();
 		this.audioElement.autoplay = true;
 		this.isPlaying = true;
-	}
-
-	pauseButton.onclick = async () => {
+	};
+	let pause = async () => {
 		pauseButton.style.display = 'none';
 		playButton.style.removeProperty('display');
-		await this.audioElement.pause();
+		this.audioElement.pause();
 		this.audioElement.autoplay = false;
 		this.isPlaying = false;
-	}
+	};
+
+	playButton.onclick = play
+	pauseButton.onclick = pause
 
 	const skipButton = controls.createDiv({cls: 'clickable-icon', title: 'Skip'});
 	setIcon(skipButton, 'skip-forward');
@@ -74,4 +76,6 @@ export async function showPlayer(this: MixView) {
 		.onChange((value) => {
 			this.audioElement.volume = value / 100;
 		});
+
+	return [play, pause];
 }

@@ -22,6 +22,7 @@ export async function showTable(this: MixView) {
 		const row = body.createEl('tr');
 
 		const moveCell = row.createEl('td');
+		moveCell.style.width = '32px';
 
 		const upButton = moveCell.createDiv({cls: 'clickable-icon', title: 'Move up'});
 		setIcon(upButton, 'chevron-up');
@@ -60,6 +61,7 @@ export async function showTable(this: MixView) {
 		}
 
 		const proportionCell = row.createEl('td');
+		proportionCell.style.width = '60px';
 		const proportionInput = proportionCell.createEl('input', {
 			cls: 'proportion',
 			type: 'number',
@@ -76,7 +78,9 @@ export async function showTable(this: MixView) {
 		}
 		proportionCell.createSpan({text: ' / ' + proportionSum});
 
-		const nameSpan = row.createEl('td').createSpan({
+		let nameCell = row.createEl('td');
+		// nameCell.style.width = '???';
+		const nameSpan = nameCell.createSpan({
 			text: playlist.name.length ? playlist.name : '<Unnamed>',
 			title: 'Configure playlist'
 		});
@@ -84,7 +88,17 @@ export async function showTable(this: MixView) {
 			await this.configurePlaylist(playlist);
 		}
 
-		createStateChart(this.mix, state, row.createEl('td'));
+		let stateChartCell = row.createEl('td');
+		stateChartCell.style.width = '32px';
+		createStateChart(this.mix, state, stateChartCell);
+
+		let playThisButtonCell = row.createEl('td');
+		playThisButtonCell.style.width = '32px';
+		const playThisButton = playThisButtonCell.createDiv({cls: 'clickable-icon', title: 'Play this'});
+		setIcon(playThisButton, 'play');
+		playThisButton.onclick = async () => {
+			await this.playSolo(state);
+		}
 	}
 
 	const lastRow = body.createEl('tr');
@@ -103,4 +117,6 @@ export async function showTable(this: MixView) {
 	resetButton.onclick = async () => {
 		await this.resetTracksAndTimes();
 	}
+
+	lastRow.createEl('td');
 }

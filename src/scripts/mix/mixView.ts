@@ -13,6 +13,8 @@ export class MixView extends ItemView {
 	audioElement: HTMLAudioElement
 	currentTrackPath: string | undefined
 	isPlaying: boolean
+	play: () => Promise<void>;
+	pause: () => Promise<void>;
 
 	async addPlaylist() {
 		const playlist = this.mix.addPlaylist("", "");
@@ -79,6 +81,18 @@ export class MixView extends ItemView {
 		await this.reload();
 	}
 
+	async playSolo(state: PlaylistState) {
+		this.mix.states.forEach(s => {
+			s.proportion = 0;
+		});
+		state.proportion = 1;
+		if (!this.isPlaying) {
+			await this.play();
+		}
+		this.mix.toNextTrack();
+		await this.reload();
+	}
+
 	async resetTracksAndTimes() {
 		this.currentTrackPath = undefined;
 		this.mix.resetTracksAndTimes();
@@ -107,7 +121,7 @@ export class MixView extends ItemView {
 		if (this.mix.activePlaylist == undefined)
 			this.mix.toNextTrack();
 		await showTable.call(this);
-		await showPlayer.call(this)
+		[this.play, this.pause] = await showPlayer.call(this);
 	}
 
 	async reload() {
