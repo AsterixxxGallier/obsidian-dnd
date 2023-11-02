@@ -92,6 +92,7 @@ const DEFAULT_WEBSITE_DISPLAY_INFORMATION: WebsiteDisplayInformation[] = [
 		script: `
 			document.querySelectorAll(
 				'div#ncmp__tool\\
+				,div#ncmp__banner\\
 				,div#navi-bar\\
 				,div#navi-bar-shadow\\
 				,header.header-wrap\\
