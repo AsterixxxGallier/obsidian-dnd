@@ -1,55 +1,79 @@
 import DnDPlugin from "../main";
 import {makeRequest, RequestBody} from "../gpt4allAPIBinding";
-import {Editor, MarkdownView, Notice} from "obsidian";
+import { Notice} from "obsidian";
+const {clipboard} = require('electron');
 
 export function registerSummarizeCommand(this: DnDPlugin) {
+	console.log("registering summarize command");
 	this.addCommand({
 		id: "language-ai-summarize",
 		name: "Summarize",
-		editorCallback: async (editor: Editor, _view: MarkdownView) => {
-			const selection = editor.getSelection();
-			if (selection == "") {
-				console.warn("empty selection, nothing to summarize");
+		// editorCallback: async (editor: Editor, _view: MarkdownView) => {
+		callback: async () => {
+			// const text = editor.getSelection();
+			const text = await clipboard.readText();
+			if (text == "") {
+				console.warn("empty text, nothing to summarize");
 				return;
 			}
-			let body: RequestBody = {
-				model: "any string works here",
-				messages: [
-					{
-						role: "user",
-						content: "Please summarize the following text accurately and factually.\n" + selection,
-					}
-				],
-				temperature: 0.7,
-				max_tokens: 2000,
-				// presence_penalty: 2.0,
-				// frequency_penalty: 2.0,
-			};
-			console.log(body);
-			const response = await makeRequest(body);
-			console.log(response);
-			new Notice(response.choices[0].message.content, 0);
+			new Notice(await summarize(text), 0);
 		},
-		// callback: () => {
-		// 	new PromptModal(this.app, async (prompt, temperature, max_tokens) => {
-		// 		let body: RequestBody = {
-		// 			model: "any string works here",
-		// 			messages: [
-		// 				{
-		// 					role: "user",
-		// 					content: prompt,
-		// 				}
-		// 			],
-		// 			temperature,
-		// 			max_tokens,
-		// 			// presence_penalty: 2.0,
-		// 			// frequency_penalty: 2.0,
-		// 		};
-		// 		console.log(body);
-		// 		const response = await makeRequest(body);
-		// 		console.log(response);
-		// 		new Notice(response.choices[0].message.content, 0);
-		// 	}).open();
-		// },
 	});
+}
+
+/*async function summarizeDirectly(text: string): Promise<string> {
+	let body: RequestBody = {
+		model: "any string works here",
+		messages: [
+			{
+				role: "user",
+				content: "Please summarize the following text.\n" + text,
+			}
+		],
+		temperature: 0.7,
+		max_tokens: 2000,
+	};
+	const response = await makeRequest(body);
+	return response.choices[0].message.content;
+}*/
+
+async function summarizeStrategically(text: string): Promise<string> {
+	const summaries = await (async () => {
+		let body: RequestBody = {
+			model: "any string works here",
+			messages: [
+				{
+					role: "user",
+					content: "Please summarize the following text.\n" + text,
+				}
+			],
+			temperature: 0.7,
+			max_tokens: 2000,
+			n: 4
+		};
+		const response = await makeRequest(body);
+		return response.choices.map(choice => choice.message.content);
+	})();
+	let body: RequestBody = {
+		model: "any string works here",
+		messages: [
+			{
+				role: "user",
+				content: "<Text>" + text + "</Text>" +
+					summaries.map((summary, index) =>
+						"\n<Summary#" + index + ">" + summary + "</Summary#" + index + ">"
+					).join("") +
+					"\nPlease compare the summaries and pick the most accurate one.",
+			}
+		],
+		temperature: 0.7,
+		max_tokens: 2000,
+	};
+	const response = await makeRequest(body);
+	return response.choices[0].message.content;
+}
+
+async function summarize(text: string): Promise<string> {
+	// return await summarizeDirectly(text);
+	return await summarizeStrategically(text);
 }

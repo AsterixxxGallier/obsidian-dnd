@@ -7,6 +7,7 @@ export interface RequestBody {
 	max_tokens?: number,
 	presence_penalty?: number,
 	frequency_penalty?: number,
+	n?: number,
 }
 
 export interface RequestResponse {
@@ -38,9 +39,7 @@ export interface Message {
 
 export async function makeRequest(body: RequestBody): Promise<RequestResponse> {
 	return new Promise((resolve, reject) => {
-		let curlProcess = spawn("cmd.exe", [
-			"/c", // Argument for cmd.exe
-			"C:\\Windows\\System32\\curl.exe",
+		let curlProcess = spawn("curl", [
 			"http://localhost:4891/v1/chat/completions",
 			"-H",
 			"Content-Type: application/json",
