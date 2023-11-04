@@ -26,7 +26,6 @@
 		"typescript": "4.7.4"
 	},
 	"dependencies": {
-		"ad-block-js": "^0.0.2",
-		"openai": "^3.2.1"
+		"ad-block-js": "^0.0.2"
 	}
 }
