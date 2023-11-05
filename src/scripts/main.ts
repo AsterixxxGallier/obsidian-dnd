@@ -14,6 +14,7 @@ import {addSearchHeaderBarToNewTabView} from './web/searchHeaderBar';
 import {addOpenFunctionHook, removeOpenFunctionHook} from './web/openFunctionHook';
 import {registerPromptCommand} from "./languageProcessing/promptCommand";
 import {registerSummarizeCommand} from "./languageProcessing/summarizeCommand";
+import {registerPDFCommand} from "./pdfProcessing/pdfCommand";
 
 export default class DnDPlugin extends Plugin {
 	__proto__: any;
@@ -43,9 +44,9 @@ export default class DnDPlugin extends Plugin {
 		registerHTMLFileExtensions.call(this);
 		addSearchHeaderBarToNewTabView.call(this);
 		addOpenFunctionHook.call(this);
-		// await test();
 		registerPromptCommand.call(this);
 		registerSummarizeCommand.call(this);
+		registerPDFCommand.call(this);
 	}
 
 	onunload() {

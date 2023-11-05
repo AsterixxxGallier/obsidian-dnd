@@ -1,10 +1,9 @@
 import DnDPlugin from "../main";
 import {makeRequest, RequestBody} from "../gpt4allAPIBinding";
-import { Notice} from "obsidian";
+import {Notice} from "obsidian";
 const {clipboard} = require('electron');
 
 export function registerSummarizeCommand(this: DnDPlugin) {
-	console.log("registering summarize command");
 	this.addCommand({
 		id: "language-ai-summarize",
 		name: "Summarize",
