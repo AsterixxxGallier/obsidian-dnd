@@ -15,6 +15,7 @@ import {addOpenFunctionHook, removeOpenFunctionHook} from './web/openFunctionHoo
 import {registerPromptCommand} from "./languageProcessing/promptCommand";
 import {registerSummarizeCommand} from "./languageProcessing/summarizeCommand";
 import {registerPDFCommand} from "./pdfProcessing/pdfCommand";
+import {registerOpenAssociatedPageCommands} from "./web/openAssociatedPageCommands";
 
 export default class DnDPlugin extends Plugin {
 	__proto__: any;
@@ -47,7 +48,7 @@ export default class DnDPlugin extends Plugin {
 		registerPromptCommand.call(this);
 		registerSummarizeCommand.call(this);
 		registerPDFCommand.call(this);
-		// TODO command for opening the active file's associated wiki page in a tracking web browser view
+		registerOpenAssociatedPageCommands.call(this);
 	}
 
 	onunload() {
