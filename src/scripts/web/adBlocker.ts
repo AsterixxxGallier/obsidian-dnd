@@ -1,5 +1,6 @@
 import DnDPlugin from '../main';
 import * as adBlock from 'ad-block-js';
+import {Notice} from "obsidian";
 
 // FIXME doesn't work (fails to catch any request)
 export async function startAdBlocker(this: DnDPlugin) {
@@ -35,9 +36,10 @@ export async function startAdBlocker(this: DnDPlugin) {
 		// console.log(remote.session.defaultSession.webRequest)
 		// @ts-ignore
 		// alternative pattern: '<all_urls>'
-		// remote.session.defaultSession.webRequest.onBeforeRequest({urls: ['*://*/*']}, (details, cb) => {
-		remote.session.defaultSession.webRequest.onBeforeRequest((details, cb) => {
+		remote.session.defaultSession.webRequest.onBeforeRequest({urls: ['*://*/*']}, (details, cb) => {
+		// remote.session.defaultSession.webRequest.onBeforeRequest((details, cb) => {
 			console.log("CAUGHT REQUEST")
+			new Notice("CAUGHT REQUEST!", 0);
 			const cancel = client.matches(details.url);
 			if (cancel) console.log('BLOCKED ', details.url);
 			else console.log('ALLOWED ', details.url);
