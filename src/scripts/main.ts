@@ -47,6 +47,7 @@ export default class DnDPlugin extends Plugin {
 		registerPromptCommand.call(this);
 		registerSummarizeCommand.call(this);
 		registerPDFCommand.call(this);
+		// TODO command for opening the active file's associated wiki page in a tracking web browser view
 	}
 
 	onunload() {

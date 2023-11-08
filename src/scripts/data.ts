@@ -70,7 +70,9 @@ const DEFAULT_WEBSITE_DISPLAY_INFORMATION: WebsiteDisplayInformation[] = [
 				,div#scroll-banner\\
 				,div.page-header__languages\\
 				,div.notifications-placeholder\\
-				,div[itemprop="video"]'
+				,div[itemprop="video"]\\
+				,div.gpt-ad\\
+				,div.ad-slot-placeholder'
 			).forEach(it => it.remove());
 	
 			const mainContainer = document.querySelector('div.main-container');
