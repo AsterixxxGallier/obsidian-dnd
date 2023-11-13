@@ -1,10 +1,14 @@
-import {App, PluginSettingTab} from "obsidian";
+import {App, PluginSettingTab, TFile} from "obsidian";
 import DnDPlugin from "./main";
+import {ScannedDocument} from "./pdfProcessing/hocrImport";
 
 export interface Settings {
 	descriptionListSeparator: string,
 	attributes: string[],
 	textIndentPrefix: string,
+	pdfPageExportDirectoryPath: string,
+	// milliseconds
+	saveSettingsInterval: number,
 }
 
 export interface WebsiteDisplayInformation {
@@ -36,6 +40,8 @@ const DEFAULT_SETTINGS: Settings = {
 	descriptionListSeparator: '::',
 	attributes: ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'],
 	textIndentPrefix: '~ ',
+	pdfPageExportDirectoryPath: 'pdfPageExport/',
+	saveSettingsInterval: 60 * 1000,
 }
 
 const DEFAULT_WEBSITE_DISPLAY_INFORMATION: WebsiteDisplayInformation[] = [
@@ -158,6 +164,7 @@ const DEFAULT_DATA: Data = {
 	wikis: DEFAULT_WIKIS,
 }
 
+export let scannedPDFs: { [pdfPath: string]: ScannedDocument } = {};
 export let data: Data;
 export let settings: Settings;
 
@@ -165,14 +172,42 @@ export function getScript(url: string): string {
 	return data.websiteDisplayInformation.find(website => new RegExp(website.urlPattern).test(url))?.script ?? '';
 }
 
+export function loadScannedPDFs() {
+	app.workspace.onLayoutReady(async () => {
+		const pdfs = <TFile[]>app.vault.getAllLoadedFiles()
+			.filter(file => (file instanceof TFile) && file.extension == "pdf");
+		for (const pdf of pdfs) {
+			const dataPath = pdf.path + ".json";
+			if (await app.vault.adapter.exists(dataPath)) {
+				const data = await app.vault.adapter.read(dataPath);
+				scannedPDFs[pdf.path] = <ScannedDocument>JSON.parse(data);
+				console.log("loaded scan of " + pdf.path);
+			}
+		}
+	});
+}
+
+export async function saveScannedPDFs() {
+	console.log("saving pdf scan data");
+	for (const pdf in scannedPDFs) {
+		await app.vault.adapter.write(pdf + ".json", JSON.stringify(scannedPDFs[pdf]));
+	}
+}
+
 export async function loadData(this: DnDPlugin) {
 	this.data = Object.assign({}, DEFAULT_DATA, await this.__proto__.loadData.call(this));
 	data = this.data;
+	// @ts-ignore
+	window.data = data;
 	settings = this.settings;
+	loadScannedPDFs();
+	// @ts-ignore
+	window.scannedPDFs = scannedPDFs;
 }
 
 export async function saveData(this: DnDPlugin) {
 	await this.__proto__.saveData.call(this, this.data);
+	await saveScannedPDFs();
 }
 
 export class SettingTab extends PluginSettingTab {

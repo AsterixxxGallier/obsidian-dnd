@@ -14,8 +14,11 @@ import {addSearchHeaderBarToNewTabView} from './web/searchHeaderBar';
 import {addOpenFunctionHook, removeOpenFunctionHook} from './web/openFunctionHook';
 import {registerPromptCommand} from "./languageProcessing/promptCommand";
 import {registerSummarizeCommand} from "./languageProcessing/summarizeCommand";
-import {registerPDFCommand} from "./pdfProcessing/pdfCommand";
+import {registerLogPDFTextCommand} from "./pdfProcessing/logPDFTextCommand";
 import {registerOpenAssociatedPageCommands} from "./web/openAssociatedPageCommands";
+import {registerHOCRImportCommand} from "./pdfProcessing/hocrImport";
+import {registerOverlayPDFScanCommand} from "./pdfProcessing/overlayPDFScanCommand";
+import {registerExportPDFPagesCommand} from "./pdfProcessing/exportPDFPagesCommand";
 
 export default class DnDPlugin extends Plugin {
 	__proto__: any;
@@ -47,11 +50,17 @@ export default class DnDPlugin extends Plugin {
 		addOpenFunctionHook.call(this);
 		registerPromptCommand.call(this);
 		registerSummarizeCommand.call(this);
-		registerPDFCommand.call(this);
+		registerHOCRImportCommand.call(this);
+		registerLogPDFTextCommand.call(this);
+		registerExportPDFPagesCommand.call(this);
+		registerOverlayPDFScanCommand.call(this);
 		registerOpenAssociatedPageCommands.call(this);
+		const interval = this.data.settings.saveSettingsInterval;
+		this.registerInterval(window.setInterval(() => this.saveData(), interval))
 	}
 
-	onunload() {
+	async onunload() {
+		await this.saveData();
 		removeOpenFunctionHook.call(this);
 	}
 }

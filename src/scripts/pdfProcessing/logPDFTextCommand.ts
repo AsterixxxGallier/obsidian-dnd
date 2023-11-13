@@ -3,11 +3,10 @@ import {loadPdfJs} from "obsidian";
 import {PDFDocumentProxy, PDFPageProxy} from "pdfjs-dist";
 import {TextItem} from "pdfjs-dist/types/src/display/api";
 
-export function registerPDFCommand(this: DnDPlugin) {
+export function registerLogPDFTextCommand(this: DnDPlugin) {
 	this.addCommand({
-		id: "pdf-command",
+		id: "log-pdf-text",
 		name: "Log PDF text",
-		// editorCallback: async (editor: Editor, _view: MarkdownView) => {
 		callback: async () => {
 			const file = app.workspace.getActiveFile();
 			const buffer = await app.vault.readBinary(file!);

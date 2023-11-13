@@ -1,0 +1,53 @@
+.ocr-layer
+	.area-box
+		position: absolute
+		z-index: 2
+		opacity: 40%
+		border: 2px solid black
+		border-radius: calc(var(--scale-factor) * 5px)
+		padding: calc(var(--scale-factor) * 2px)
+		box-sizing: content-box
+		margin-top: calc(var(--scale-factor) * -2px)
+		margin-left: calc(var(--scale-factor) * -2px)
+
+	.paragraph-box
+		position: absolute
+		z-index: 3
+		$color: change-color(blue, $alpha: 0.1)
+		background-color: $color
+		opacity: 40%
+		box-shadow: 0 0 calc(var(--scale-factor) * 2px) calc(var(--scale-factor) * 2px) $color
+		border: 1px solid cadetblue
+		border-radius: calc(var(--scale-factor) * 2px)
+		padding: calc(var(--scale-factor) * 1px)
+		box-sizing: content-box
+		margin-top: calc(var(--scale-factor) * -1px)
+		margin-left: calc(var(--scale-factor) * -1px)
+
+		&:hover, &:has(:hover)
+			opacity: 100%
+
+		.word-box
+			position: absolute
+			z-index: 4
+			opacity: 40%
+			padding: calc(var(--scale-factor) * 2px)
+			box-sizing: content-box
+			margin-top: calc(var(--scale-factor) * -2px)
+			margin-left: calc(var(--scale-factor) * -2px)
+
+			&.extremely-low-confidence
+				border-bottom: 4px solid red
+
+			&.low-confidence
+				border-bottom: 3px solid orangered
+
+			&.moderate-confidence
+				border-bottom: 2px solid orange
+
+			&.high-confidence
+				border-bottom: 2px solid green
+				display: none
+
+			&.confirmed
+				display: none
