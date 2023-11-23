@@ -1,53 +1,69 @@
 .ocr-layer
-	.area-box
-		position: absolute
-		z-index: 2
-		opacity: 40%
-		border: 2px solid black
-		border-radius: calc(var(--scale-factor) * 5px)
-		padding: calc(var(--scale-factor) * 2px)
-		box-sizing: content-box
-		margin-top: calc(var(--scale-factor) * -2px)
-		margin-left: calc(var(--scale-factor) * -2px)
+  .area-box
+    position: absolute
+    z-index: 2
+    opacity: 40%
+    border: 2px solid black
+    border-radius: calc(var(--scale-factor) * 5px)
+    padding: calc(var(--scale-factor) * 2px)
+    box-sizing: content-box
+    margin-top: calc(var(--scale-factor) * -2px)
+    margin-left: calc(var(--scale-factor) * -2px)
 
-	.paragraph-box
-		position: absolute
-		z-index: 3
-		$color: change-color(blue, $alpha: 0.1)
-		background-color: $color
-		opacity: 40%
-		box-shadow: 0 0 calc(var(--scale-factor) * 2px) calc(var(--scale-factor) * 2px) $color
-		border: 1px solid cadetblue
-		border-radius: calc(var(--scale-factor) * 2px)
-		padding: calc(var(--scale-factor) * 1px)
-		box-sizing: content-box
-		margin-top: calc(var(--scale-factor) * -1px)
-		margin-left: calc(var(--scale-factor) * -1px)
+  .paragraph-box
+    position: absolute
+    z-index: 3
+    $color: change-color(blue, $alpha: 0.1)
+    background-color: $color
+    opacity: 20%
+    box-shadow: 0 0 calc(var(--scale-factor) * 2px) calc(var(--scale-factor) * 2px) $color
+    border: 1px solid cadetblue
+    border-radius: calc(var(--scale-factor) * 2px)
+    padding: calc(var(--scale-factor) * 1px)
+    box-sizing: content-box
+    margin-top: calc(var(--scale-factor) * -1px)
+    margin-left: calc(var(--scale-factor) * -1px)
 
-		&:hover, &:has(:hover)
-			opacity: 100%
+    &:hover, &:has(:hover)
+      opacity: 50%
 
-		.word-box
-			position: absolute
-			z-index: 4
-			opacity: 40%
-			padding: calc(var(--scale-factor) * 2px)
-			box-sizing: content-box
-			margin-top: calc(var(--scale-factor) * -2px)
-			margin-left: calc(var(--scale-factor) * -2px)
+    &.selected
+      opacity: 100% !important
 
-			&.extremely-low-confidence
-				border-bottom: 4px solid red
+      .word-box.extremely-low-confidence, .word-box.low-confidence, .word-box.moderate-confidence
+        opacity: 100% !important
 
-			&.low-confidence
-				border-bottom: 3px solid orangered
+    .line-box
+      position: absolute
+      z-index: 4
+      background-color: greenyellow
+      opacity: 10%
 
-			&.moderate-confidence
-				border-bottom: 2px solid orange
+    .word-box
+      position: absolute
+      z-index: 5
+      opacity: 40%
+      padding: calc(var(--scale-factor) * 2px)
+      box-sizing: content-box
+      margin-top: calc(var(--scale-factor) * -2px)
+      margin-left: calc(var(--scale-factor) * -2px)
 
-			&.high-confidence
-				border-bottom: 2px solid green
-				display: none
+      &.extremely-low-confidence
+        border-bottom: 4px solid red
 
-			&.confirmed
-				display: none
+      &.low-confidence
+        border-bottom: 3px solid orangered
+
+      &.moderate-confidence
+        border-bottom: 2px solid orange
+
+      &.high-confidence
+        border-bottom: 2px solid green
+        opacity: 0
+
+      &.confirmed
+        opacity: 0
+
+.correct-word-input
+  position: fixed
+  z-index: var(--layer-menu)

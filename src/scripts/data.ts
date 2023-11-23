@@ -34,6 +34,7 @@ export interface Data {
 	websiteDisplayInformation: WebsiteDisplayInformation[],
 	searchEngines: SearchEngine[],
 	wikis: Wiki[],
+	customPDFPrefixes: { [pdfPath: string]: string },
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -162,6 +163,7 @@ const DEFAULT_DATA: Data = {
 	websiteDisplayInformation: DEFAULT_WEBSITE_DISPLAY_INFORMATION,
 	searchEngines: DEFAULT_SEARCH_ENGINES,
 	wikis: DEFAULT_WIKIS,
+	customPDFPrefixes: {},
 }
 
 export let scannedPDFs: { [pdfPath: string]: ScannedDocument } = {};

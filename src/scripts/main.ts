@@ -19,6 +19,8 @@ import {registerOpenAssociatedPageCommands} from "./web/openAssociatedPageComman
 import {registerHOCRImportCommand} from "./pdfProcessing/hocrImport";
 import {registerOverlayPDFScanCommand} from "./pdfProcessing/overlayPDFScanCommand";
 import {registerExportPDFPagesCommand} from "./pdfProcessing/exportPDFPagesCommand";
+import {registerCleanPDFScanCommand} from "./pdfProcessing/cleanPDFScanCommand";
+import {registerSetCustomPDFPrefixCommand} from "./pdfProcessing/setCustomPDFPrefixCommand";
 
 export default class DnDPlugin extends Plugin {
 	__proto__: any;
@@ -54,9 +56,12 @@ export default class DnDPlugin extends Plugin {
 		registerLogPDFTextCommand.call(this);
 		registerExportPDFPagesCommand.call(this);
 		registerOverlayPDFScanCommand.call(this);
+		registerCleanPDFScanCommand.call(this);
+		registerSetCustomPDFPrefixCommand.call(this);
 		registerOpenAssociatedPageCommands.call(this);
 		const interval = this.data.settings.saveSettingsInterval;
-		this.registerInterval(window.setInterval(() => this.saveData(), interval))
+		this.registerInterval(window.setInterval(() => this.saveData(), interval));
+		this.registerEvent(app.workspace.on("window-close", () => this.saveData()));
 	}
 
 	async onunload() {

@@ -320,7 +320,7 @@ function hocrDocumentToScannedDocument(document: HOCRDocument): ScannedDocument 
 	};
 }
 
-function cleanScannedDocument(document: ScannedDocument) {
+export function cleanScannedDocument(document: ScannedDocument) {
 	for (let i = 0; i < document.pages.length; i++){
 		const page = document.pages[i];
 		for (let i1 = 0; i1 < page.areas.length; i1++){
