@@ -167,6 +167,7 @@ const DEFAULT_DATA: Data = {
 }
 
 export let scannedPDFs: { [pdfPath: string]: ScannedDocument } = {};
+let scannedPDFsChanged: boolean = false;
 export let data: Data;
 export let settings: Settings;
 
@@ -189,6 +190,10 @@ export function loadScannedPDFs() {
 	});
 }
 
+export function markScannedPDFsChanged() {
+	scannedPDFsChanged = true;
+}
+
 export async function saveScannedPDFs() {
 	console.log("saving pdf scan data");
 	for (const pdf in scannedPDFs) {
@@ -209,7 +214,8 @@ export async function loadData(this: DnDPlugin) {
 
 export async function saveData(this: DnDPlugin) {
 	await this.__proto__.saveData.call(this, this.data);
-	await saveScannedPDFs();
+	if (scannedPDFsChanged) await saveScannedPDFs();
+	scannedPDFsChanged = false;
 }
 
 export class SettingTab extends PluginSettingTab {

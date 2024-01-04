@@ -1,6 +1,6 @@
 import DnDPlugin from "../main";
 import {App, Modal, Setting} from "obsidian";
-import {scannedPDFs} from "../data";
+import {markScannedPDFsChanged, scannedPDFs} from "../data";
 
 export class HOCRImportModal extends Modal {
 	pdfFilePath: string;
@@ -78,6 +78,7 @@ export function registerHOCRImportCommand(this: DnDPlugin) {
 				const scannedDocument = hocrDocumentToScannedDocument(joinedDocument);
 				cleanScannedDocument(scannedDocument);
 				scannedPDFs[pdfFilePath] = scannedDocument;
+				markScannedPDFsChanged();
 				/*const paragraphsWithLineSize = extractParagraphs(joinedDocument);
 				console.log(paragraphsWithLineSize);
 				const paragraphsCategorized = paragraphsWithLineSize

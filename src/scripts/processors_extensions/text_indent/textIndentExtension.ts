@@ -41,13 +41,17 @@ class TextIndentExtension implements PluginValue {
 						const from = node.from + i;
 						const to = node.from + i + prefix.length;
 						if (selectionAndRangeOverlap(selection, from, to)) continue;
-						builder.add(
-							from,
-							to,
-							Decoration.replace({
-								widget: new TextIndentWidget(),
-							})
-						);
+						try {
+							builder.add(
+								from,
+								to,
+								Decoration.replace({
+									widget: new TextIndentWidget(),
+								})
+							);
+						} catch (e) {
+							console.warn(e.message);
+						}
 					}
 				},
 			});

@@ -1,7 +1,7 @@
 import DnDPlugin from "../main";
 import {TFile, View} from "obsidian";
 import {cleanScannedDocument} from "./hocrImport";
-import {saveScannedPDFs, scannedPDFs} from "../data";
+import {markScannedPDFsChanged, saveScannedPDFs, scannedPDFs} from "../data";
 
 export function registerCleanPDFScanCommand(this: DnDPlugin) {
 	this.addCommand({
@@ -31,6 +31,8 @@ export function registerCleanPDFScanCommand(this: DnDPlugin) {
 			console.log(scannedPDFs);
 
 			cleanScannedDocument(document);
+
+			markScannedPDFsChanged();
 
 			await saveScannedPDFs();
 		},

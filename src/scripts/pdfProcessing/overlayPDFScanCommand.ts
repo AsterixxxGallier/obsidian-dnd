@@ -2,7 +2,7 @@ import DnDPlugin from "../main";
 import {Menu, Notice, TFile, View} from "obsidian";
 import {moveBoundingBox, RelativeBoundingBox, ScannedParagraph} from "./hocrImport";
 import {PDFPageView} from "pdfjs-dist/types/web/pdf_page_view";
-import {data, scannedPDFs} from "../data";
+import {data, markScannedPDFsChanged, scannedPDFs} from "../data";
 
 export function registerOverlayPDFScanCommand(this: DnDPlugin) {
     const plugin = this;
@@ -109,6 +109,7 @@ export function registerOverlayPDFScanCommand(this: DnDPlugin) {
                                             .setIcon("check")
                                             .onClick(() => {
                                                 word.confirmed = true;
+	                                            markScannedPDFsChanged();
                                                 wordEl.removeClass(confidenceClass);
                                                 wordEl.addClass('confirmed');
                                                 wordEl.title = word.confidence + ": " + word.text + " (confirmed)";
@@ -135,6 +136,7 @@ export function registerOverlayPDFScanCommand(this: DnDPlugin) {
                                                         }
                                                     }
                                                 }
+	                                            markScannedPDFsChanged();
                                             })
                                     );
 
@@ -152,6 +154,7 @@ export function registerOverlayPDFScanCommand(this: DnDPlugin) {
                                                     if (key != "Enter") return;
                                                     word.text = inputEl.value;
                                                     word.confirmed = true;
+	                                                markScannedPDFsChanged();
                                                     wordEl.removeClass(confidenceClass);
                                                     wordEl.addClass('confirmed');
                                                     wordEl.title = word.confidence + ": " + word.text;
